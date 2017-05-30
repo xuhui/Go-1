@@ -1,0 +1,64 @@
+canvas {
+    display: block;
+    box-shadow: -2px -2px 2px #efefef, 8px 8px 8px #b9b9b9
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+#go_header {
+    font-size: 18px;
+}
+
+#go_header span {
+    font-size: 14px;
+}
+
+.go-info {
+    font-size: 15px;
+}
+
+#room-id,
+#enter-room {
+    font-size: 15px;
+}
+
+.left {
+    flex: 1;
+    margin-right: 120px;
+}
+
+.right {
+    margin: 0 50px 0 100px;
+}
+
+.flex {
+    display: flex;
+    margin-top: 20px;
+}
+
+.list {
+    max-height: 500px;
+    overflow: auto;
+}
+
+.info-date {
+    font-size: 13px;
+}
+
+@media all and (max-width:768px) {
+    .flex {
+        display: block;
+        margin-top: 0px;
+    }
+    .left {
+        margin-top: 20px;
+        margin-left: 0px;
+    }
+    .right {
+        margin-right: 0px;
+    }
+}
