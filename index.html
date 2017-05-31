@@ -3,14 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>人机五子棋</title>
+    <title>GO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=1.0, user-scalable=yes">
     <link rel="stylesheet" href="css/style.css">
+    <script src="libs/jquery.min.js"></script>
 </head>
 
 <body>
-    <audio src="" autoplay id="bgm"></audio>
-    <audio autoplay="" id="step"></audio>
-    <canvas id="chess" width="630" height="630"></canvas>
+    <div class="flex">
+        <div class="right">
+            <canvas id="chess" width="570" height="570"></canvas>
+        </div>
+        <div class="left">
+            <h1 id="go_header">欢迎来到围棋..</h1>
+            <h3 class="go-info">===<span>请先进入房间</span>===</h3>
+            <div class="room">
+                <input type="text" placeholder="自定义房间名" id="room-id">
+                <button id="enter-room">进入房间</button>
+            </div>
+            <ul class="list">
+            </ul>
+        </div>
+    </div>
+    <script src="socket.io/socket.io.js"></script>
     <script src="js/script.js"></script>
 </body>
 
