@@ -29,13 +29,29 @@ logo.onload = function() {
 }
 
 var drawChessBoard = function() {
+    context.font = "17px Georgia";
+    context.textAlign = "center";
+    context.textBaseline = 'middle';
+    context.fillStyle='#000';
+    var padding=15;
+
     for (var i = 0; i < 19; i++) {
-        context.moveTo(15 + i * 30, 15);
-        context.lineTo(15 + i * 30, 555);
+        context.moveTo(padding + i * 30, padding);
+        context.lineTo(padding + i * 30, 555);
+        context.fillText(i,padding + i * 30,7)
         context.stroke();
-        context.moveTo(15, 15 + i * 30);
-        context.lineTo(555, 15 + i * 30);
+        context.moveTo(padding, padding + i * 30);
+        context.lineTo(555, padding + i * 30);
+        context.fillText(i,7,padding + i * 30)
         context.stroke();
+    }
+    for (var i = 3; i < 19; i += 6) {
+        for (var j = 3; j < 19; j += 6) {
+            context.fillStyle = '#111'
+            context.beginPath()
+            context.arc(padding + i * 30, padding + j * 30, 5, 0, 2 * Math.PI)
+            context.fill()
+        }
     }
 }
 var oneStep = function(i, j, me) {
