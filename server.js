@@ -12,7 +12,9 @@ app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 
 io.on('connection', function(socket) {
     totalUser++
-    console.log('1位用户链接了,总共 ' + totalUser + '人', socket.id)
+    var d=new Date()
+    var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
+    console.log('1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线--'+date)
 
     // 加入房间
     socket.on('joinRoom', function(roomId) {
@@ -40,14 +42,16 @@ io.on('connection', function(socket) {
             socket.emit('message', '房间已满，换个房间吧。')
         }
 
-        console.log('rooms', rooms)
-        console.log('users', users)
+        //console.log('rooms', rooms)
+        //console.log('users', users)
     })
 
     socket.on('disconnect', function() {
 
         totalUser--
-        console.log('1位用户断开了,总共 ' + totalUser + '人', socket.id)
+        var d=new Date()
+        var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
+        console.log('1位用户断开了,当前总共 [ ' + totalUser + ' ] 人在线--'+date)
         if (!(socket.id in users)) {
             return
         }
@@ -55,7 +59,7 @@ io.on('connection', function(socket) {
             var idA = rooms[users[socket.id]].playerA
             var idB = rooms[users[socket.id]].playerB
                 // 移除分组
-            io.to(users[socket.id]).emit('oneOut', '玩家退出啦');
+            io.to(users[socket.id]).emit('oneOut', '你的对手已经退出啦~');
             if (io.sockets.sockets[idA]) {
                 io.sockets.sockets[idA].leave(users[socket.id])
             }
@@ -69,8 +73,8 @@ io.on('connection', function(socket) {
         delete users[rooms[roomId].playerA]
         delete users[rooms[roomId].playerB]
         delete rooms[roomId]
-        console.log('rooms', rooms)
-        console.log('users', users)
+        //console.log('rooms', rooms)
+        //console.log('users', users)
     })
     socket.on('isEnter', function() {
         if (!(socket.id in users)) {
@@ -93,15 +97,21 @@ io.on('connection', function(socket) {
         if (!rooms[_roomId].firstStep) {
             rooms[_roomId].firstStep = socket.id
             io.to(_roomId).emit('startStep', socket.id, i, j) // 广播
-            console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+            //console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
 
             return
         }
         socket.broadcast.to(_roomId).emit('singleSetp', socket.id, me, i, j) //广播不包含自己
-        console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+        //console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
     })
 })
 
 http.listen(5000, function() {
-    console.log('====围棋服务器启动成功，端口 5000====')
+    var d=new Date()
+    var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
+    console.log('==============================================\n==============================================\n服务器启动成功，端口 5000 --启动时间：'+date+' \n==============================================\n可以开始下棋了。\n==============================================')
 })
+
+function padZero(num) {
+    return String(num).length < 2 ? '0' + String(num) : String(num)
+}
