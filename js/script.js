@@ -7,7 +7,7 @@ var me = true; // 黑子为TRUE
 var myTurn = false;
 var start = false;
 var firstStep = true;
-var steps = 1;
+var steps = 0;
 var group = 0;
 var alive = [];
 var oneKillObj = {}; // 打劫
@@ -32,17 +32,17 @@ var drawChessBoard = function() {
     context.font = "17px Georgia";
     context.textAlign = "center";
     context.textBaseline = 'middle';
-    context.fillStyle='#000';
-    var padding=15;
+    context.fillStyle = '#000';
+    var padding = 15;
 
     for (var i = 0; i < 19; i++) {
         context.moveTo(padding + i * 30, padding);
         context.lineTo(padding + i * 30, 555);
-        context.fillText(i,padding + i * 30,7)
+        context.fillText(i, padding + i * 30, 7)
         context.stroke();
         context.moveTo(padding, padding + i * 30);
         context.lineTo(555, padding + i * 30);
-        context.fillText(i,7,padding + i * 30)
+        context.fillText(i, 7, padding + i * 30)
         context.stroke();
     }
     for (var i = 3; i < 19; i += 6) {
@@ -55,8 +55,9 @@ var drawChessBoard = function() {
     }
 }
 var oneStep = function(i, j, me) {
-    record(me, i, j);
     steps++;
+    record(me, i, j);
+    // console.log('step', steps)
     var random = parseInt(Math.random() * randomStr.length);
     logMsg((me ? '黑' : '白') + '棋下在了( ' + i + ' , ' + j + ' )位置,' + randomStr[random]);
     myTurn = !myTurn;
@@ -69,6 +70,7 @@ var oneStep = function(i, j, me) {
     // 当前落子坐标
     var tempX = i;
     var tempY = j;
+    var tempValue = chessBord[i][j].value
 
     // 打劫坐标
     var oneKillX;
@@ -78,6 +80,7 @@ var oneStep = function(i, j, me) {
     for (var i = 0; i < 19; i++) {
         for (var j = 0; j < 19; j++) {
             if (chessBord[i][j].value && !chessBord[i][j].group && alone(i, j)) {
+                console.log('alone', i, j)
                 group++;
             }
             if (chessBord[i][j].value) {
@@ -91,34 +94,41 @@ var oneStep = function(i, j, me) {
     drawChessBoard();
 
     var kill = 0
+    var killSelf = []
         // 画子
     for (var i = 0; i < 19; i++) {
         for (var j = 0; j < 19; j++) {
             if (alive[chessBord[i][j].group] === undefined && chessBord[i][j].value) {
-                if (i !== tempX || j !== tempY) {
+                if (tempValue !== chessBord[i][j].value) { // 提对方
                     kill++
                     oneKillX = i
                     oneKillY = j
+                    chessBord[i][j] = {}
+                } else { // 提自己
+                    killSelf.push([i, j])
                 }
-                chessBord[i][j] = {}
-                console.log('KILL' + kill, i, j, chessBord[i][j])
+                console.log('===KILLED ' + kill + '===', i, j, chessBord[i][j])
             } else {
                 drawSingle(i, j)
             }
         }
     }
 
-    if (kill > 0) {
-        chessBord[tempX][tempY].value = me ? 1 : 2
-        chessBord[tempX][tempY].step = steps
-        drawSingle(tempX, tempY)
-    }
-    if (kill === 1) {
+    if (kill === 1 && !chessBord[tempX][tempY].value) {
         console.log('打劫')
         oneKillObj.oneKillX = oneKillX
         oneKillObj.oneKillY = oneKillY
         oneKillObj.step = steps
     }
+
+    if (kill === 0 && false) {
+        for (var a = 0; a < killSelf.length; a++) { //提自己
+            var x = killSelf[a][0]
+            var y = killSelf[a][1]
+            chessBord[x][y] = {}
+        }
+    }
+    console.log(alive)
     alive = []
 }
 
@@ -154,39 +164,65 @@ function drawSingle(i, j) {
 
 }
 
-function findSameGroup(i, j) { //查找同一片棋子
+function findSameGroup(i, j, currentGroup) { //查找同一片棋子
     var colorValue = chessBord[i][j].value
+
     if (!colorValue) {
         return
     }
-    if (!chessBord[i][j].group) {
-        chessBord[i][j].group = group
+
+    if (!chessBord[i][j].group && alone(i, j)) {
+        currentGroup = chessBord[i][j].group = group
+        console.log('ALONE=======', i, j, chessBord[i][j].group, currentGroup)
+    } else if (chessBord[i][j].group) {
+        currentGroup = chessBord[i][j].group
     }
 
-    var currentGroup = chessBord[i][j].group
 
+    if (i - 1 > -1 && chessBord[i - 1][j].value === colorValue && chessBord[i - 1][j].group !== currentGroup) {
+        if (currentGroup === undefined) {
+            console.log('进来了1')
+            currentGroup = chessBord[i - 1][j].group
+        } else {
+            chessBord[i - 1][j].group = currentGroup
+        }
+        findSameGroup(i - 1, j, currentGroup)
+    }
+    if (j - 1 > -1 && chessBord[i][j - 1].value === colorValue && chessBord[i][j - 1].group !== currentGroup) {
+        if (currentGroup === undefined) {
+            console.log('进来了2')
+            currentGroup = chessBord[i][j - 1].group
+        } else {
+            chessBord[i][j - 1].group = currentGroup
+        }
+        findSameGroup(i, j - 1, currentGroup)
+    }
+    if (i + 1 < 19 && chessBord[i + 1][j].value === colorValue && chessBord[i + 1][j].group !== currentGroup) {
+        if (currentGroup === undefined) {
+            console.log('进来了3')
+
+            currentGroup = chessBord[i + 1][j].group
+        } else {
+            chessBord[i + 1][j].group = currentGroup
+        }
+        findSameGroup(i + 1, j, currentGroup)
+    }
+    if (j + 1 < 19 && chessBord[i][j + 1].value === colorValue && chessBord[i][j + 1].group !== currentGroup) {
+        if (currentGroup === undefined) {
+            console.log('进来了4')
+
+            currentGroup = chessBord[i][j + 1].group
+        } else {
+            chessBord[i][j + 1].group = currentGroup
+        }
+        findSameGroup(i, j + 1, currentGroup)
+    }
+
+    // console.log(i, j, '当前分组', currentGroup, alive[currentGroup])
     if (isAlive(i, j)) { // 一个子是活的，整片是活的
+        console.log(i, j, 'CURRENT GROUP 为', currentGroup)
         alive[currentGroup] = true
     }
-    // console.log(i, j, '当前分组', currentGroup, alive[currentGroup])
-
-    if (i - 1 > -1 && chessBord[i - 1][j].value === colorValue && !chessBord[i - 1][j].group) {
-        chessBord[i - 1][j].group = currentGroup
-        findSameGroup(i - 1, j)
-    }
-    if (j - 1 > -1 && chessBord[i][j - 1].value === colorValue && !chessBord[i][j - 1].group) {
-        chessBord[i][j - 1].group = currentGroup
-        findSameGroup(i, j - 1)
-    }
-    if (i + 1 < 19 && chessBord[i + 1][j].value === colorValue && !chessBord[i + 1][j].group) {
-        chessBord[i + 1][j].group = currentGroup
-        findSameGroup(i + 1, j)
-    }
-    if (j + 1 < 19 && chessBord[i][j + 1].value === colorValue && !chessBord[i][j + 1].group) {
-        chessBord[i][j + 1].group = currentGroup
-        findSameGroup(i, +1)
-    }
-
 }
 
 function isAlive(i, j) { // 判断气数
@@ -269,14 +305,17 @@ socket.on('bEnter', function(msg) {
     logMsg(msg)
 })
 
-socket.on('notEnter', function(msg) {
+socket.on('message', function(msg) {
     logMsg(msg)
 })
 
-
-
-socket.on('roomFilled', function(msg) {
+socket.on('oneOut', function(msg) {
     logMsg(msg)
+    popMsg(msg, '我也退出', '再看看', function() {
+        location.reload()
+    }, function() {
+        document.querySelector('.pop-msg-wrapper').style = 'display:none'
+    })
 })
 
 socket.on('changeRoom', function(msg) {
@@ -298,6 +337,10 @@ $('#enter-room').on('click', function() {
 
 })
 
+$('#quit-room').on('click', function() {
+    location.reload()
+})
+
 function record(me, i, j) {
     if (me) {
         chessBord[i][j].value = 1
@@ -311,6 +354,26 @@ function logMsg(msg) {
     var d = new Date()
     var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
     $('.list').prepend('<li>' + msg + '。--<span class="info-date">' + date + '</span></li>')
+}
+
+function popMsg(title, confirm, cancel, callback1, callback2) {
+    var container = document.createElement('div')
+    container.innerHTML =
+        '    <div class="pop-msg-wrapper">' +
+        '        <div class="pop-msg-main">' +
+        '            <p class="pop-msg-title">' + (title ? title : '确定？') + '</p>' +
+        '            <button class="pop-msg-confirm">' + (confirm ? confirm : '确定') + '</button>' +
+        '            <button class="pop-msg-cancel">' + (cancel ? cancel : '取消') + '</button>' +
+        '        </div>' +
+        '    </div>';
+    document.body.appendChild(container)
+    document.querySelector('.pop-msg-wrapper').style = '    position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0,0,0,0.5);font-size: 2rem;z-index: 9999;'
+    document.querySelector('.pop-msg-main').style = '    width: 60%;height: 36%; position: absolute;top: 50%;left: 50%; -webkit-transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);transform: translate(-50%,-50%);text-align: center;background: #fff;'
+    document.querySelector('.pop-msg-title').style = '   height: 40%;text-align: center;padding-top:50px;font-size:2.5rem;'
+    var buttons = document.querySelectorAll('.pop-msg-main button')
+    buttons[0].style = buttons[1].style = '    display: inline-block;width: 20%;height: 10%;margin: 30px;background: #428bca;border:none;color:#fff '
+    buttons[0].onclick = callback1
+    buttons[1].onclick = callback2
 }
 
 function padZero(num) {
