@@ -20,7 +20,7 @@ for (var i = 0; i < 19; i++) {
 }
 
 var padding = 30;
-var width = 40
+var width = 32
 var totalWidth = width * 18 + padding * 2
 chess.width = chess.height = totalWidth
 var logo = new Image();
@@ -38,7 +38,7 @@ var drawChessBoard = function() {
     context.fillStyle = lineColor;
 
     for (var i = 0; i < 19; i++) {
-        var numPadding=padding / 2-2
+        var numPadding = padding / 2 - 2
         context.moveTo(padding + i * width, padding);
         context.lineTo(padding + i * width, totalWidth - padding);
         context.fillText(i, padding + i * width, numPadding)
@@ -46,8 +46,8 @@ var drawChessBoard = function() {
         context.stroke();
         context.moveTo(padding, padding + i * width);
         context.lineTo(totalWidth - padding, padding + i * width);
-        context.fillText(i, numPadding, padding + i * width-2)
-        context.strokeText(i, numPadding, padding + i * width-2)
+        context.fillText(i, numPadding, padding + i * width - 2)
+        context.strokeText(i, numPadding, padding + i * width - 2)
         context.stroke();
     }
     for (var i = 3; i < 19; i += 6) {
@@ -84,7 +84,7 @@ var oneStep = function(i, j, me) {
     for (var i = 0; i < 19; i++) {
         for (var j = 0; j < 19; j++) {
             if (chessBord[i][j].value && !chessBord[i][j].group && alone(i, j)) {
-                console.log('alone', i, j)
+                // console.log('alone', i, j)
                 group++;
             }
             if (chessBord[i][j].value) {
@@ -98,22 +98,20 @@ var oneStep = function(i, j, me) {
     drawChessBoard();
 
     var kill = 0
-    var killSelf = []
+    var saveSelf = []
         // 画子
     for (var i = 0; i < 19; i++) {
         for (var j = 0; j < 19; j++) {
             if (alive[chessBord[i][j].group] === undefined && chessBord[i][j].value) {
-                if (tempValue !== chessBord[i][j].value) { // 提对方
+                if (tempValue === chessBord[i][j].value) {
+                    saveSelf.push([i, j, chessBord[i][j].step])
+                } else {
                     kill++
                     oneKillX = i
                     oneKillY = j
-                    chessBord[i][j] = {}
-                } else { // 提自己
-                    killSelf.push([i, j])
                 }
-                if (tempValue === chessBord[i][j].value) {
-                    drawSingle(i, j)
-                }
+                chessBord[i][j] = {}
+
                 console.log('===KILLED ' + kill + '===', i, j, chessBord[i][j])
             } else {
                 drawSingle(i, j)
@@ -121,21 +119,25 @@ var oneStep = function(i, j, me) {
         }
     }
 
+
+    if (kill !== 0) {
+        for (var a = 0; a < saveSelf.length; a++) { //提自己
+            var x = saveSelf[a][0]
+            var y = saveSelf[a][1]
+            var z = saveSelf[a][2]
+            chessBord[x][y] = { value: tempValue, step: z }
+            drawSingle(x, y)
+        }
+    } else if (saveSelf.length) {
+        logMsg((me ? '黑' : '白') + '棋发动自杀式攻击。')
+    }
     if (kill === 1 && chessBord[tempX][tempY].value) {
         console.log('打劫')
         oneKillObj.oneKillX = oneKillX
         oneKillObj.oneKillY = oneKillY
         oneKillObj.step = steps
+        oneKillObj.value = chessBord[tempX][tempY].value
     }
-
-    if (kill === 0) {
-        for (var a = 0; a < killSelf.length; a++) { //提自己
-            var x = killSelf[a][0]
-            var y = killSelf[a][1]
-            chessBord[x][y] = {}
-        }
-    }
-    console.log(alive)
     alive = []
 }
 
@@ -162,7 +164,7 @@ function drawSingle(i, j) {
         context.fillStyle = 'black'
 
     }
-    context.fillText(chessBord[i][j].step, padding + i * width, padding + j * width - 3);
+    context.fillText(chessBord[i][j].step, padding + i * width, padding + j * width);
 
 }
 
@@ -175,7 +177,7 @@ function findSameGroup(i, j, currentGroup) { //查找同一片棋子
 
     if (!chessBord[i][j].group && alone(i, j)) {
         currentGroup = chessBord[i][j].group = group
-        console.log('ALONE=======', i, j, chessBord[i][j].group, currentGroup)
+            //console.log('ALONE=======', i, j, chessBord[i][j].group, currentGroup)
     } else if (chessBord[i][j].group) {
         currentGroup = chessBord[i][j].group
     }
@@ -218,7 +220,7 @@ function findSameGroup(i, j, currentGroup) { //查找同一片棋子
 
     // console.log(i, j, '当前分组', currentGroup, alive[currentGroup])
     if (isAlive(i, j)) { // 一个子是活的，整片是活的
-        console.log(i, j, 'CURRENT GROUP 为', currentGroup)
+        // console.log(i, j, 'CURRENT GROUP 为', currentGroup)
         alive[currentGroup] = true
     }
 }
@@ -262,12 +264,11 @@ function alone(i, j) {
 chess.onclick = function(e) {
     var x = e.offsetX
     var y = e.offsetY
-    var i = Math.floor(x / width)
-    var j = Math.floor(y / width)
-
-    if (i === oneKillObj.oneKillX && j === oneKillObj.oneKillY && steps === oneKillObj.step) { // 打劫判断
+    var i = Math.floor((x - padding / 2) / width)
+    var j = Math.floor((y - padding / 2) / width)
+    if (i === oneKillObj.oneKillX && j === oneKillObj.oneKillY && steps === oneKillObj.step && myTurn) { // 打劫判断
         logMsg('====打劫咯..====')
-        oneKillObj = {}
+            //oneKillObj = {}
         return
     }
     if (start && firstStep) {
@@ -308,12 +309,13 @@ socket.on('message', function(msg) {
 })
 
 socket.on('oneOut', function(msg) {
-    logMsg(msg)
-    popMsg(msg, '我也退出', '再看看', function() {
+    logMsg(msg);
+    popMsg(msg, '重选房间', '再看看', function() {
         location.reload()
     }, function() {
         document.querySelector('.pop-msg-wrapper').style = 'display:none'
-    })
+    });
+    $('#enter-room').hide()
 })
 
 socket.on('changeRoom', function(msg) {
