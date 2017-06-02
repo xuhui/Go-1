@@ -19,37 +19,41 @@ for (var i = 0; i < 19; i++) {
     }
 }
 
-context.strokeStyle = '#000';
-
+var padding = 30;
+var width = 40
+var totalWidth = width * 18 + padding * 2
+chess.width = chess.height = totalWidth
 var logo = new Image();
 logo.src = "images/logo.jpg";
 logo.onload = function() {
-    context.drawImage(logo, 0, 0, 570, 570)
+    context.drawImage(logo, 0, 0, totalWidth, totalWidth)
     drawChessBoard();
 }
-
+var lineColor = '#000'
 var drawChessBoard = function() {
-    context.font = "17px Georgia";
+    context.font = "18px san-serif";
     context.textAlign = "center";
     context.textBaseline = 'middle';
-    context.fillStyle = '#000';
-    var padding = 15;
+    context.strokeStyle = lineColor;
+    context.fillStyle = lineColor;
 
     for (var i = 0; i < 19; i++) {
-        context.moveTo(padding + i * 30, padding);
-        context.lineTo(padding + i * 30, 555);
-        context.fillText(i, padding + i * 30, 7)
+        var numPadding=padding / 2-2
+        context.moveTo(padding + i * width, padding);
+        context.lineTo(padding + i * width, totalWidth - padding);
+        context.fillText(i, padding + i * width, numPadding)
+        context.strokeText(i, padding + i * width, numPadding)
         context.stroke();
-        context.moveTo(padding, padding + i * 30);
-        context.lineTo(555, padding + i * 30);
-        context.fillText(i, 7, padding + i * 30)
+        context.moveTo(padding, padding + i * width);
+        context.lineTo(totalWidth - padding, padding + i * width);
+        context.fillText(i, numPadding, padding + i * width-2)
+        context.strokeText(i, numPadding, padding + i * width-2)
         context.stroke();
     }
     for (var i = 3; i < 19; i += 6) {
         for (var j = 3; j < 19; j += 6) {
-            context.fillStyle = '#111'
             context.beginPath()
-            context.arc(padding + i * 30, padding + j * 30, 5, 0, 2 * Math.PI)
+            context.arc(padding + i * width, padding + j * width, width / 8, 0, 2 * Math.PI)
             context.fill()
         }
     }
@@ -89,8 +93,8 @@ var oneStep = function(i, j, me) {
         }
     }
 
-    context.clearRect(0, 0, 570, 570);
-    context.drawImage(logo, 0, 0, 570, 570)
+    context.clearRect(0, 0, totalWidth, totalWidth);
+    context.drawImage(logo, 0, 0, totalWidth, totalWidth)
     drawChessBoard();
 
     var kill = 0
@@ -107,7 +111,7 @@ var oneStep = function(i, j, me) {
                 } else { // 提自己
                     killSelf.push([i, j])
                 }
-                if(tempValue === chessBord[i][j].value){
+                if (tempValue === chessBord[i][j].value) {
                     drawSingle(i, j)
                 }
                 console.log('===KILLED ' + kill + '===', i, j, chessBord[i][j])
@@ -137,33 +141,28 @@ var oneStep = function(i, j, me) {
 
 
 function drawSingle(i, j) {
+    var gradient = context.createRadialGradient(padding + i * width + 2, padding + j * width - 2, padding, padding + i * width + 2, padding + j * width - 2, 0)
     if (chessBord[i][j].value === 1) {
-        var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 15, 15 + i * 30 + 2, 15 + j * 30 - 2, 0)
         gradient.addColorStop(0, "#0a0a0a")
         gradient.addColorStop(1, "#636766")
-        context.fillStyle = gradient
-        context.beginPath()
-            // 画圆
-        context.arc(15 + i * 30, 15 + j * 30, 14, 0, 2 * Math.PI)
-        context.fill()
-        context.beginPath()
-        context.fillStyle = 'yellow'
-        context.fillText(chessBord[i][j].step, 15 + i * 30, 15 + j * 30 - 3);
-
     } else if (chessBord[i][j].value === 2) {
-        var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 15, 15 + i * 30 + 2, 15 + j * 30 - 2, 0)
         gradient.addColorStop(0, "#ccc")
         gradient.addColorStop(1, "#fff")
-        context.fillStyle = gradient
-        context.beginPath()
-            // 画圆
-        context.arc(15 + i * 30, 15 + j * 30, 14, 0, 2 * Math.PI)
-        context.fill()
-        context.beginPath()
-        context.fillStyle = 'black'
-        context.fillText(chessBord[i][j].step, 15 + i * 30, 15 + j * 30 - 3);
 
     }
+    context.fillStyle = gradient
+    context.beginPath()
+    context.arc(padding + i * width, padding + j * width, width / 2 - 2, 0, 2 * Math.PI)
+    context.fill()
+    context.beginPath()
+    if (chessBord[i][j].value === 1) {
+        context.fillStyle = 'yellow'
+
+    } else if (chessBord[i][j].value === 2) {
+        context.fillStyle = 'black'
+
+    }
+    context.fillText(chessBord[i][j].step, padding + i * width, padding + j * width - 3);
 
 }
 
@@ -263,8 +262,8 @@ function alone(i, j) {
 chess.onclick = function(e) {
     var x = e.offsetX
     var y = e.offsetY
-    var i = Math.floor(x / 30)
-    var j = Math.floor(y / 30)
+    var i = Math.floor(x / width)
+    var j = Math.floor(y / width)
 
     if (i === oneKillObj.oneKillX && j === oneKillObj.oneKillY && steps === oneKillObj.step) { // 打劫判断
         logMsg('====打劫咯..====')
