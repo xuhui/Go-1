@@ -4,17 +4,12 @@ var io = require('socket.io')(http)
 var totalUser = 0
 var firstStep
 var users = {}
-    // var roomIds = new Array(100).fill('room').map((it, index) => {
-    //     return it + (index + 1)
-    // })
 var rooms = {}
 app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 
 io.on('connection', function(socket) {
     totalUser++
-    var d=new Date()
-    var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
-    console.log('1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线--'+date)
+    console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
 
     // 加入房间
     socket.on('joinRoom', function(roomId) {
@@ -29,13 +24,13 @@ io.on('connection', function(socket) {
             rooms[roomId].playerA = socket.id
             users[socket.id] = roomId
             socket.join(roomId)
-            io.to(roomId).emit('message', '您进入了 '+roomId+' 房间，邀请你的小伙伴吧');
+            io.to(roomId).emit('message', '您进入了 <span id="msg-room-id">'+roomId+' </span>房间，邀请你的小伙伴吧');
         } else if (!rooms[roomId].playerB && rooms[roomId].playerA !== socket.id) {
             rooms[roomId].playerB = socket.id
             users[socket.id] = roomId
             socket.join(roomId)
                 //socket.broadcast.to(roomId).emit('bEnter', '玩家进入,可以开始了');
-            io.to(roomId).emit('bEnter', '双方已就位,可以开始了，任意一方先手。');
+            io.to(roomId).emit('message', '双方已就位,可以开始了，任意一方先手。');
         } else if (socket.id === rooms[roomId].playerA || socket.id === rooms[roomId].playerB) {
             socket.emit('message', `你已经加进房间 ${roomId} 啦。`)
         } else {
@@ -47,11 +42,8 @@ io.on('connection', function(socket) {
     })
 
     socket.on('disconnect', function() {
-
         totalUser--
-        var d=new Date()
-        var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
-        console.log('1位用户断开了,当前总共 [ ' + totalUser + ' ] 人在线--'+date)
+        console.log('------------\n'+'1位用户断开了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
         if (!(socket.id in users)) {
             return
         }
@@ -59,20 +51,20 @@ io.on('connection', function(socket) {
             var idA = rooms[users[socket.id]].playerA
             var idB = rooms[users[socket.id]].playerB
                 // 移除分组
-            io.to(users[socket.id]).emit('oneOut', '你的对手已经退出啦~');
             if (io.sockets.sockets[idA]) {
                 io.sockets.sockets[idA].leave(users[socket.id])
             }
             if (io.sockets.sockets[idB]) {
                 io.sockets.sockets[idB].leave(users[socket.id])
             }
+            var roomId=users[socket.id]
+
+            delete users[rooms[roomId].playerA]
+            delete users[rooms[roomId].playerB]
+            delete rooms[roomId]
+            io.to(users[socket.id]).emit('oneOut', '你的对手已经退出啦~');
 
         }
-        var roomId=users[socket.id]
-
-        delete users[rooms[roomId].playerA]
-        delete users[rooms[roomId].playerB]
-        delete rooms[roomId]
         //console.log('rooms', rooms)
         //console.log('users', users)
     })
@@ -107,11 +99,29 @@ io.on('connection', function(socket) {
 })
 
 http.listen(5000, function() {
-    var d=new Date()
-    var date = '' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds())
-    console.log('==============================================\n==============================================\n服务器启动成功，端口 5000 --启动时间：'+date+' \n==============================================\n可以开始下棋了。\n==============================================')
+    console.log('==============================================\n==============================================\n服务器启动成功，端口 5000 --启动时间：'+dateNow()+' \n==============================================\n可以开始下棋了。\n==============================================')
 })
 
-function padZero(num) {
-    return String(num).length < 2 ? '0' + String(num) : String(num)
+function dateNow(d){
+    function padZero(num) {
+        return String(num).length < 2 ? '0' + String(num) : String(num)
+    }
+    var d=d ? new Date(d) : new Date()
+    var week=['一','二','三','四','五','六','日']
+    var date = 
+    '' 
+    +d.getFullYear()
+    + '-'
+    + padZero(d.getMonth()+ 1) 
+    + '-'
+    + padZero(d.getDate())
+    + ' '
+    + padZero(d.getHours()) 
+    + ':' 
+    + padZero(d.getMinutes()) 
+    + ':' 
+    + padZero(d.getSeconds())
+    + ' 星期'
+    + week[d.getDay()]
+    return date
 }
