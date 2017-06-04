@@ -64,8 +64,8 @@ io.on('connection', function(socket) {
             delete users[rooms[roomId].playerB]
             delete rooms[roomId]
 
-        console.log('rooms', rooms)
-        console.log('users', users)
+        //console.log('rooms', rooms)
+        //console.log('users', users)
         }
     })
     socket.on('isEnter', function() {
@@ -89,17 +89,17 @@ io.on('connection', function(socket) {
         if (!rooms[_roomId].firstStep) {
             rooms[_roomId].firstStep = socket.id
             io.to(_roomId).emit('startStep', socket.id, i, j) // 广播
-            console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+            // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
 
             return
         }
         socket.broadcast.to(_roomId).emit('singleSetp', socket.id, me, i, j) //广播不包含自己
-        console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+        // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
     })
 })
 
 http.listen(5000, function() {
-    console.log('==============================================\n==============================================\n服务器启动成功，端口 5000 --启动时间：'+dateNow()+' \n==============================================\n可以开始下棋了。\n==============================================')
+    console.log('==============================================\n服务器启动成功，端口 5000 启动时间：'+dateNow()+' \n==============================================')
 })
 
 function dateNow(d){
