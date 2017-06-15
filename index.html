@@ -26,8 +26,48 @@
             </ul>
         </div>
     </div>
+    <div class="go-mask">
+        <div class="mask-wrapper">
+            <h1>Hello ,<a href="#" class="username">未登录</a>。</h1>
+            <div class="log-reg">
+                <div class="log active">
+                    <input type="text" id="log-username" placeholder="用户名">
+                    <input type="password" id="log-password" placeholder="密码">
+                    <div class="submit-wrapper">
+                        <span class="log-info">&nbsp;</span>
+                        <button class="log-submit">登录</button>
+                        <a href="#" class="to-reg">没有账号？注册</a>
+                    </div>
+                </div>
+                <div class="reg">
+                    <input type="text" id="reg-username" placeholder="用户名">
+                    <input type="password" id="reg-password" placeholder="密码">
+                    <input type="password" id="reg-password-confirm" placeholder="确认密码">
+                    <div class="submit-wrapper">
+                        <span class="reg-info">&nbsp;</span>
+                        <button class="reg-submit">注册</button>
+                        <a href="#" class="to-log">已有账号？登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="room-wrapper">
+            <div class="room-item">
+                <h3 class="room-name">roomname</h3>
+                <div class="room-left">
+                    <img src="" alt="">
+                    <p class="roon-user">pppppppppppppppppppppppp</p>
+                </div>
+                <div class="room-right">
+                    <img src="" alt="">
+                    <p class="roon-user">pppppppppppppppppppppppp</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="socket.io/socket.io.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/index.js"></script>
 </body>
 
 </html>

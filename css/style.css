@@ -7,6 +7,7 @@ canvas {
     margin: 0;
     padding: 0;
     font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    box-sizing: border-box;
 }
 
 #go_header {
@@ -95,8 +96,86 @@ canvas {
         margin:0 auto;
     }
 }
+.go-mask{
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    overflow: auto;
+    background-color: #ccc;
+}
+.mask-wrapper{
+    width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.log-reg input{
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
+}
+button{
+    display: inline-block;
+    min-width: 120px;
+    padding: 5px;
+    background: #333;
+    color: #fff;
+    font-size: 1.2rem;
+    border: 1px solid #fff;
+    outline: none;
+}
+button:hover{
+    background: #111;
+    transition: all 0.3s;
+}
+button:active{
+    border: 1px solid #011;
+}
+a{
+    text-decoration: none;
+    color: #33d;
+}
+a:hover{
+    text-decoration: underline;
+}
+.log-info,.reg-info{
+    font-size: 0.86rem;
+    display: block;
+    color: #f00;
+}
 
+.room-name{
+    text-align: center;
+}
+.room-left,.room-right{
+    float: left;
+}
+.room-left{
+    margin: 0 30px 0 10px;
+}
+.room-item{
+    background: green;
+    float: left;
+    width: 250px;
+    
+}
 
+.room-item img{
+    width: 100px;
+    height: 100px;
+    vertical-align: bottom;
+}
+.roon-user{
+    margin: 0;
+    width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 /*b{
     position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0,0,0,0.5);font-size: 2rem;z-index: 9999;
     width: 80%;height: 50%; position: absolute;top: 50%;left: 50%; -webkit-transform: translate(-50%,-50%);-ms-transform: translate(-50%,-50%);transform: translate(-50%,-50%);text-align: center;background: #fff;

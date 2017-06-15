@@ -7,6 +7,13 @@ var users = {}
 var rooms = {}
 app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 
+app.get('/isLogin',function (req,res) {
+    if(req.cookies){
+        res.end(req.cookies)
+    }else {
+        res.end('unLogin')
+    }
+})
 io.on('connection', function(socket) {
     totalUser++
     console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
