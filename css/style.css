@@ -25,9 +25,13 @@ canvas {
 #quit-room,
 #enter-room {
     font-size: 1rem;
-    padding: 10px;
+    padding: 5px;
     background: #333;
     color: #fff;
+    flex:1;
+}
+#enter-room{
+    margin: 0 10px;
 }
 #room-id{
     border-radius: 6px;
@@ -35,12 +39,16 @@ canvas {
     outline: none;
     color: #222;
     border: 2px solid;
-    padding-left: 20px;
+    padding-left: 10px;
+}
+.room{
+    /display: flex;
 }
 
 .left {
     flex: 1;
-    margin-right: 120px;
+    margin-right: 100px;
+    padding-top: 10px;
 }
 
 .right {
@@ -49,7 +57,6 @@ canvas {
 
 .flex {
     display: flex;
-    margin-top: 20px;
 }
 
 .list {
@@ -62,15 +69,18 @@ canvas {
     font-size: 1rem;
     font-weight: 600;
     background: #333;
-    color: #fff;
+    color: #bbb;
     border-radius: 5px;
     padding: 10px;
     padding-left: 20px;
 }
+.list li:first-child{
+    color: #fff;
+    font-size: 1.2rem;
+}
 
 .info-date {
-    font-size: 13px;
-    color: #689;
+    font-size: 12px;
 }
 
 @media all and (max-width:768px) {
@@ -79,11 +89,10 @@ canvas {
         margin-top: 0px;
     }
     .left {
-        margin-top: 20px;
-        margin-left: 0px;
+        margin-top: 10px;
     }
     .right {
-        margin-right: 0px;
+        margin:0 auto;
     }
 }
 

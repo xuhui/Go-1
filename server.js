@@ -30,7 +30,7 @@ io.on('connection', function(socket) {
             users[socket.id] = roomId
             socket.join(roomId)
                 //socket.broadcast.to(roomId).emit('bEnter', '玩家进入,可以开始了');
-            io.to(roomId).emit('message', '双方已就位,可以开始了，任意一方先手。');
+            io.to(roomId).emit('bEnter', '双方已就位,可以开始了，任意一方先手。');
         } else if (socket.id === rooms[roomId].playerA || socket.id === rooms[roomId].playerB) {
             socket.emit('message', `你已经加进房间 ${roomId} 啦。`)
         } else {
@@ -51,6 +51,7 @@ io.on('connection', function(socket) {
             var idA = rooms[users[socket.id]].playerA
             var idB = rooms[users[socket.id]].playerB
                 // 移除分组
+            io.to(users[socket.id]).emit('oneOut', '你的对手已经退出房间,请重新选择房间~');
             if (io.sockets.sockets[idA]) {
                 io.sockets.sockets[idA].leave(users[socket.id])
             }
@@ -62,11 +63,10 @@ io.on('connection', function(socket) {
             delete users[rooms[roomId].playerA]
             delete users[rooms[roomId].playerB]
             delete rooms[roomId]
-            io.to(users[socket.id]).emit('oneOut', '你的对手已经退出啦~');
 
-        }
         //console.log('rooms', rooms)
         //console.log('users', users)
+        }
     })
     socket.on('isEnter', function() {
         if (!(socket.id in users)) {
@@ -89,17 +89,17 @@ io.on('connection', function(socket) {
         if (!rooms[_roomId].firstStep) {
             rooms[_roomId].firstStep = socket.id
             io.to(_roomId).emit('startStep', socket.id, i, j) // 广播
-            //console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+            // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
 
             return
         }
         socket.broadcast.to(_roomId).emit('singleSetp', socket.id, me, i, j) //广播不包含自己
-        //console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+        // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
     })
 })
 
 http.listen(88, function() {
-    console.log('==============================================\n==============================================\n服务器启动成功，端口 88 --启动时间：'+dateNow()+' \n==============================================\n可以开始下棋了。\n==============================================')
+    console.log('\n服务器启动成功，端口 88 --启动时间：'+dateNow()+' \n')
 })
 
 function dateNow(d){
