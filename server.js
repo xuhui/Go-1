@@ -5,6 +5,16 @@ let io = require('socket.io')(http)
 let bodyParser = require('body-parser')
 let multer = require('multer')
 
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'wyl',
+    password: '1234',
+    port: '3306',
+    database: 'mysql',
+});
+connection.connect();
+
 let totalUser = 0
 let firstStep
 let users = {}
