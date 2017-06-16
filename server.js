@@ -1,10 +1,17 @@
-var app = require('express')()
-var http = require('http').Server(app)
-var io = require('socket.io')(http)
-var totalUser = 0
-var firstStep
-var users = {}
-var rooms = {}
+let app = require('express')()
+let http = require('http').Server(app)
+let fs = require('fs')
+let io = require('socket.io')(http)
+let bodyParser = require('body-parser')
+let multer = require('multer')
+
+let totalUser = 0
+let firstStep
+let users = {}
+let rooms = {}
+
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 
 app.get('/isLogin',function (req,res) {
@@ -14,6 +21,37 @@ app.get('/isLogin',function (req,res) {
         res.end('unLogin')
     }
 })
+app.post('/login',function(req,res){
+    console.log(req.body)
+})
+app.post('/register',function(req,res){
+    console.log(req.body)
+})
+
+
+
+let storage = multer.diskStorage({
+    destination: function(req, file, cb) { // 存放位置
+        cb(null, 'uploads')
+    },
+    filename: function(req, file, cb) { // 文件名
+        cb(null, file.originalname)
+    }
+})
+let upload = multer({ storage: storage })
+
+app.post('/upload', upload.single('avatar'), function(req, res) {
+    if(!req.file){
+        console.log(req.params)     
+        return
+    }
+    // let resData = JSON.stringify({ src: 'http://' + req.hostname + `:${PORT}/` + req.file.destination + '/' + req.file.filename })
+    // res.set({
+    //     'Access-Control-Allow-Origin': '*',
+    // })
+    // res.end(resData)
+})
+
 io.on('connection', function(socket) {
     totalUser++
     console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
@@ -55,8 +93,8 @@ io.on('connection', function(socket) {
             return
         }
         if (rooms[users[socket.id]]) {
-            var idA = rooms[users[socket.id]].playerA
-            var idB = rooms[users[socket.id]].playerB
+            let idA = rooms[users[socket.id]].playerA
+            let idB = rooms[users[socket.id]].playerB
                 // 移除分组
             io.to(users[socket.id]).emit('oneOut', '你的对手已经退出房间,请重新选择房间~');
             if (io.sockets.sockets[idA]) {
@@ -65,7 +103,7 @@ io.on('connection', function(socket) {
             if (io.sockets.sockets[idB]) {
                 io.sockets.sockets[idB].leave(users[socket.id])
             }
-            var roomId=users[socket.id]
+            let roomId=users[socket.id]
 
             delete users[rooms[roomId].playerA]
             delete users[rooms[roomId].playerB]
@@ -80,7 +118,7 @@ io.on('connection', function(socket) {
             socket.emit('message', '请先进入房间')
             return
         }
-        var _roomId = users[socket.id]
+        let _roomId = users[socket.id]
         if (!rooms[_roomId].playerB) {
             socket.emit('message', '请等待你的小伙伴加入')
             return
@@ -88,7 +126,7 @@ io.on('connection', function(socket) {
     })
 
     socket.on('one step', function(me, i, j) {
-        var _roomId = users[socket.id]
+        let _roomId = users[socket.id]
         if(!rooms[_roomId]){
             socket.emit('message','你的小伙伴已经退出。')
             return
@@ -105,17 +143,17 @@ io.on('connection', function(socket) {
     })
 })
 
-http.listen(88, function() {
+http.listen(888, function() {
     console.log('\n服务器启动成功，端口 88 --启动时间：'+dateNow()+' \n')
 })
 
-function dateNow(d){
+function dateNow(dateString){
     function padZero(num) {
         return String(num).length < 2 ? '0' + String(num) : String(num)
     }
-    var d=d ? new Date(d) : new Date()
-    var week=['一','二','三','四','五','六','日']
-    var date = 
+    let d=dateString ? new Date(dateString) : new Date()
+    let week=['一','二','三','四','五','六','日']
+    let date = 
     '' 
     +d.getFullYear()
     + '-'

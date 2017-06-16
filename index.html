@@ -11,10 +11,10 @@
 
 <body>
     <div class="flex">
-        <div class="right">
+        <div class="go-right">
             <canvas id="chess"></canvas>
         </div>
-        <div class="left">
+        <div class="go-left">
             <h1 id="go_header">欢迎来到围棋..</h1>
             <h3 class="go-info">===<span>请先进入房间</span>===</h3>
             <div class="room">
@@ -27,40 +27,83 @@
         </div>
     </div>
     <div class="go-mask">
-        <div class="mask-wrapper">
-            <h1>Hello ,<a href="#" class="username">未登录</a>。</h1>
-            <div class="log-reg">
-                <div class="log active">
-                    <input type="text" id="log-username" placeholder="用户名">
-                    <input type="password" id="log-password" placeholder="密码">
-                    <div class="submit-wrapper">
-                        <span class="log-info">&nbsp;</span>
-                        <button class="log-submit">登录</button>
-                        <a href="#" class="to-reg">没有账号？注册</a>
+        <div class="log-reg-wrapper">
+            <div class="head-wrapper">
+                <h1>Hello ,<a href="#" class="username">未登录</a>。</h1>
+                <div class="log-reg">
+                    <div class="log active">
+                        <input type="text" id="log-username" placeholder="用户名">
+                        <input type="password" id="log-password" placeholder="密&nbsp;&nbsp;码">
+                        <div class="submit-wrapper">
+                            <span class="log-info">&nbsp;</span>
+                            <button class="log-submit">登录</button>
+                            <a href="#" class="to-reg">没有账号？注册</a>
+                        </div>
                     </div>
-                </div>
-                <div class="reg">
-                    <input type="text" id="reg-username" placeholder="用户名">
-                    <input type="password" id="reg-password" placeholder="密码">
-                    <input type="password" id="reg-password-confirm" placeholder="确认密码">
-                    <div class="submit-wrapper">
-                        <span class="reg-info">&nbsp;</span>
-                        <button class="reg-submit">注册</button>
-                        <a href="#" class="to-log">已有账号？登录</a>
+                    <div class="reg">
+                        <input type="text" id="reg-username" placeholder="用户名">
+                        <input type="password" id="reg-password" placeholder="密&nbsp;&nbsp;码">
+                        <input type="password" id="reg-password-confirm" placeholder="确认密码">
+                        <input type="text" id="reg-nickname" placeholder="昵称">
+
+                        <div class="upload-img">
+                            <form id="upload-form" action="upload" method="POST" enctype="multipart/form-data" target="target-iframe">
+                                <span>上传头像</span>
+                                <input type="file" id="upload-input" name="avatar"/>
+                            </form>
+                            <img src="" id="avatar" width="150" height="150">
+                            <iframe name="target-iframe" style="display: none;"></iframe>
+                        </div>
+                        <div class="submit-wrapper">
+                            <span class="reg-info">&nbsp;</span>
+                            <button class="reg-submit">注册</button>
+                            <a href="#" class="to-log">已有账号？登录</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="create-room">
+                <h1>Hello 。</h1>
+                <input type="text" placeholder="请输入房间名">
+                <button>进入房间</button>
+                <button>创建房间</button>
+            </div>
+            
         </div>
         <div class="room-wrapper">
+            <h2>Current</h2>
             <div class="room-item">
                 <h3 class="room-name">roomname</h3>
                 <div class="room-left">
-                    <img src="" alt="">
+                    <img src="" alt="img">
                     <p class="roon-user">pppppppppppppppppppppppp</p>
                 </div>
                 <div class="room-right">
-                    <img src="" alt="">
+                    <img src="" alt="img">
                     <p class="roon-user">pppppppppppppppppppppppp</p>
+                </div>
+            </div>            
+
+            <div class="room-item">
+                <h3 class="room-name">roomname</h3>
+                <div class="room-left">
+                    <img src="" alt="img">
+                    <p class="roon-user">点击加入</p>
+                </div>
+                <div class="room-right">
+                    <img src="" alt="img">
+                    <p class="roon-user">点击加入</p>
+                </div>
+            </div>            
+            <div class="room-item">
+                <h3 class="room-name">roomname</h3>
+                <div class="room-left">
+                    <img src="" alt="img">
+                    <p class="roon-user">点击加入</p>
+                </div>
+                <div class="room-right">
+                    <img src="" alt="img">
+                    <p class="roon-user">点击加入点击加入</p>
                 </div>
             </div>
         </div>
