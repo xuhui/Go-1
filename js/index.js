@@ -53,6 +53,7 @@ $(function() {
         var password = $('#reg-password').val();
         var passwordConfirm = $('#reg-password-confirm').val();
         var nickname = $('#reg-nickname').val();
+        var sign = $('#reg-sign').val();
 
         if (!(reg.test(username))) {
             $('.reg-info').text('用户名格式不正确 (请以字母开头，可包含字母、数字、下划线,长度 4-16)。');
@@ -72,6 +73,7 @@ $(function() {
                 username: username,
                 password: password,
                 nickname: nickname,
+                sign: sign,
             }, function(data) {
                 console.log(data)
             })

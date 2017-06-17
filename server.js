@@ -5,15 +5,15 @@ let io = require('socket.io')(http)
 let bodyParser = require('body-parser')
 let multer = require('multer')
 
-// var mysql = require('mysql');
-// var connection = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'wyl',
-//     password: '1234',
-//     port: '3306',
-//     database: 'mysql',
-// });
-// connection.connect();
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'wyl',
+    password: '1234',
+    port: '3306',
+    database: 'godb',
+});
+connection.connect();
 
 let totalUser = 0
 let firstStep
@@ -24,18 +24,73 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 
-app.get('/isLogin',function (req,res) {
-    if(req.cookies){
+// Sql语句
+let addSql = 'INSERT INTO users(id,username,password,nickname,sign) VALUES(null,?,?,?,?)';
+let selSql = 'SELECT * FROM users WHERE username=?';
+
+
+
+app.get('/isLogin', function(req, res) {
+    if (req.cookies) {
         res.end(req.cookies)
-    }else {
+    } else {
         res.end('unLogin')
     }
 })
-app.post('/login',function(req,res){
+
+
+app.post('/login', function(req, res) {
+    let params = req.body;
+
     console.log(req.body)
+    connection.query(selSql, params.username, (err, result) => {
+        if (err) {
+            console.log(err)
+            res.end('数据库查询错误');
+        }
+
+        if (result.length === 0) {
+            res.end('用户名不存在');
+        } else if (result[0].password === params.password) {
+            let userObj=result[0];
+            let resJSON = JSON.stringify({
+                username: userObj.username,
+                nickname: userObj.nickname,
+                sign: userObj.sign,
+                avatar: userObj.avatar
+            });
+            res.setHeader('content-type', 'application/json;charset=utf8');
+            res.end(resJSON);
+        } else {
+            res.end('密码错误');
+        }
+    });
 })
-app.post('/register',function(req,res){
-    console.log(req.body)
+app.post('/register', function(req, res) {
+    let params = req.body;
+    // 去重复
+    connection.query(selSql, params.username, (err, result) => {
+        if (err) {
+            console.log(err)
+            res.end('数据库查询错误');
+        }
+        if (result.length > 0) {
+            res.end('用户名已存在');
+            return;
+        }
+        //添加用户
+        let addSqlParams = [params.username, params.password, params.nickname, params.sign];
+        connection.query(addSql, addSqlParams, (err, result) => {
+            if (err) {
+                console.log(err)
+                res.end('数据库写入错误');
+            }
+            res.end('注册成功');
+        });
+
+    });
+
+
 })
 
 
@@ -51,20 +106,20 @@ let storage = multer.diskStorage({
 let upload = multer({ storage: storage })
 
 app.post('/upload', upload.single('avatar'), function(req, res) {
-    if(!req.file){
-        console.log(req.params)     
+    if (!req.file) {
+        res.end('noimg')
         return
     }
     // let resData = JSON.stringify({ src: 'http://' + req.hostname + `:${PORT}/` + req.file.destination + '/' + req.file.filename })
     // res.set({
     //     'Access-Control-Allow-Origin': '*',
     // })
-    // res.end(resData)
+    res.end('img uploaed')
 })
 
 io.on('connection', function(socket) {
     totalUser++
-    console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
+    //console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
 
     // 加入房间
     socket.on('joinRoom', function(roomId) {
@@ -79,7 +134,7 @@ io.on('connection', function(socket) {
             rooms[roomId].playerA = socket.id
             users[socket.id] = roomId
             socket.join(roomId)
-            io.to(roomId).emit('message', '您进入了 <span id="msg-room-id">'+roomId+' </span>房间，邀请你的小伙伴吧');
+            io.to(roomId).emit('message', '您进入了 <span id="msg-room-id">' + roomId + ' </span>房间，邀请你的小伙伴吧');
         } else if (!rooms[roomId].playerB && rooms[roomId].playerA !== socket.id) {
             rooms[roomId].playerB = socket.id
             users[socket.id] = roomId
@@ -98,7 +153,7 @@ io.on('connection', function(socket) {
 
     socket.on('disconnect', function() {
         totalUser--
-        console.log('------------\n'+'1位用户断开了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
+        //console.log('------------\n'+'1位用户断开了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
         if (!(socket.id in users)) {
             return
         }
@@ -113,14 +168,14 @@ io.on('connection', function(socket) {
             if (io.sockets.sockets[idB]) {
                 io.sockets.sockets[idB].leave(users[socket.id])
             }
-            let roomId=users[socket.id]
+            let roomId = users[socket.id]
 
             delete users[rooms[roomId].playerA]
             delete users[rooms[roomId].playerB]
             delete rooms[roomId]
 
-        //console.log('rooms', rooms)
-        //console.log('users', users)
+            //console.log('rooms', rooms)
+            //console.log('users', users)
         }
     })
     socket.on('isEnter', function() {
@@ -137,46 +192,33 @@ io.on('connection', function(socket) {
 
     socket.on('one step', function(me, i, j) {
         let _roomId = users[socket.id]
-        if(!rooms[_roomId]){
-            socket.emit('message','你的小伙伴已经退出。')
+        if (!rooms[_roomId]) {
+            socket.emit('message', '你的小伙伴已经退出。')
             return
         }
         if (!rooms[_roomId].firstStep) {
             rooms[_roomId].firstStep = socket.id
             io.to(_roomId).emit('startStep', socket.id, i, j) // 广播
-            // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+                // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
 
             return
         }
         socket.broadcast.to(_roomId).emit('singleSetp', socket.id, me, i, j) //广播不包含自己
-        // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
+            // console.log((me ? '黑棋' : '白棋') + '坐标: ', i, j)
     })
 })
 
 http.listen(888, function() {
-    console.log('\n服务器启动成功，端口 88 --启动时间：'+dateNow()+' \n')
+    console.log('\n服务器启动成功，端口 88 --启动时间：' + dateNow() + ' \n')
 })
 
-function dateNow(dateString){
+function dateNow(dateString) {
     function padZero(num) {
         return String(num).length < 2 ? '0' + String(num) : String(num)
     }
-    let d=dateString ? new Date(dateString) : new Date()
-    let week=['一','二','三','四','五','六','日']
-    let date = 
-    '' 
-    +d.getFullYear()
-    + '-'
-    + padZero(d.getMonth()+ 1) 
-    + '-'
-    + padZero(d.getDate())
-    + ' '
-    + padZero(d.getHours()) 
-    + ':' 
-    + padZero(d.getMinutes()) 
-    + ':' 
-    + padZero(d.getSeconds())
-    + ' 星期'
-    + week[d.getDay()-1]
+    let d = dateString ? new Date(dateString) : new Date()
+    let week = ['日', '一', '二', '三', '四', '五', '六', ]
+    let date =
+        '' + d.getFullYear() + '-' + padZero(d.getMonth() + 1) + '-' + padZero(d.getDate()) + ' ' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds()) + ' 星期' + week[d.getDay()]
     return date
 }
