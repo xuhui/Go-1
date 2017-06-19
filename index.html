@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>GO</title>
-    <meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=1.0, user-scalable=yes">
     <link rel="stylesheet" href="css/style.css">
     <script src="libs/jquery.min.js"></script>
 </head>
@@ -18,9 +17,9 @@
             <h1 id="go_header">欢迎来到围棋..</h1>
             <h3 class="go-info">===<span>请先进入房间</span>===</h3>
             <div class="room">
-                <input type="text" placeholder="自定义房间名" id="room-id">
+<!--                 <input type="text" placeholder="自定义房间名" id="room-id">
                 <button id="enter-room">进入房间</button>
-                <button id="quit-room">我要退出</button>
+                <button id="quit-room">我要退出</button> -->
             </div>
             <ul class="list">
             </ul>
@@ -51,6 +50,7 @@
                             <form id="upload-form" action="upload" method="POST" enctype="multipart/form-data" target="target-iframe">
                                 <span>上传头像</span>
                                 <input type="file" id="upload-input" name="avatar"/>
+                                <input type="hidden" name="img-username" id="img-username">
                             </form>
                             <img src="" id="avatar" width="150" height="150">
                             <iframe name="target-iframe" style="display: none;"></iframe>
@@ -65,48 +65,15 @@
             </div>
             <div class="create-room">
                 <h1>Hello 。</h1>
-                <input type="text" placeholder="请输入房间名">
-                <button>进入房间</button>
-                <button>创建房间</button>
+                <input type="text" placeholder="请输入房间名" id="room-id">
+                <button id="enter-room">进入房间</button>
+                <button id="quit-room">创建房间</button>
             </div>
             
         </div>
         <div class="room-wrapper">
             <h2>Current</h2>
-            <div class="room-item">
-                <h3 class="room-name">roomname</h3>
-                <div class="room-left">
-                    <img src="" alt="img">
-                    <p class="roon-user">pppppppppppppppppppppppp</p>
-                </div>
-                <div class="room-right">
-                    <img src="" alt="img">
-                    <p class="roon-user">pppppppppppppppppppppppp</p>
-                </div>
-            </div>            
-
-            <div class="room-item">
-                <h3 class="room-name">roomname</h3>
-                <div class="room-left">
-                    <img src="" alt="img">
-                    <p class="roon-user">点击加入</p>
-                </div>
-                <div class="room-right">
-                    <img src="" alt="img">
-                    <p class="roon-user">点击加入</p>
-                </div>
-            </div>            
-            <div class="room-item">
-                <h3 class="room-name">roomname</h3>
-                <div class="room-left">
-                    <img src="" alt="img">
-                    <p class="roon-user">点击加入</p>
-                </div>
-                <div class="room-right">
-                    <img src="" alt="img">
-                    <p class="roon-user">点击加入点击加入</p>
-                </div>
-            </div>
+            <div class="room-items"></div>
         </div>
     </div>
     <script src="socket.io/socket.io.js"></script>

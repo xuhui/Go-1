@@ -5,6 +5,7 @@ let io = require('socket.io')(http)
 let bodyParser = require('body-parser')
 let multer = require('multer')
 
+const PORT = 88;
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -27,19 +28,23 @@ app.use(require('express').static(__dirname + "/", { index: "index.html" }))
 // Sql语句
 let addSql = 'INSERT INTO users(id,username,password,nickname,sign) VALUES(null,?,?,?,?)';
 let selSql = 'SELECT * FROM users WHERE username=?';
+let updateSql = 'UPDATE users SET avatar = ? WHERE username = ?';
 
 
 
 app.get('/isLogin', function(req, res) {
+    res.setHeader('content-type', 'application/json;charset=utf8');
     if (req.cookies) {
         res.end(req.cookies)
     } else {
-        res.end('unLogin')
+        res.end('{"msg":"unLogin"}')
     }
 })
 
 
 app.post('/login', function(req, res) {
+    res.setHeader('content-type', 'application/json;charset=utf8');
+
     let params = req.body;
 
     console.log(req.body)
@@ -52,14 +57,13 @@ app.post('/login', function(req, res) {
         if (result.length === 0) {
             res.end('用户名不存在');
         } else if (result[0].password === params.password) {
-            let userObj=result[0];
+            let userObj = result[0];
             let resJSON = JSON.stringify({
                 username: userObj.username,
                 nickname: userObj.nickname,
                 sign: userObj.sign,
                 avatar: userObj.avatar
             });
-            res.setHeader('content-type', 'application/json;charset=utf8');
             res.end(resJSON);
         } else {
             res.end('密码错误');
@@ -67,6 +71,8 @@ app.post('/login', function(req, res) {
     });
 })
 app.post('/register', function(req, res) {
+    res.setHeader('content-type', 'application/json;charset=utf8');
+
     let params = req.body;
     // 去重复
     connection.query(selSql, params.username, (err, result) => {
@@ -99,30 +105,35 @@ let storage = multer.diskStorage({
     destination: function(req, file, cb) { // 存放位置
         cb(null, 'uploads')
     },
-    filename: function(req, file, cb) { // 文件名
-        cb(null, file.originalname)
+    filename: function(req, file, cb) { // 文件名=用户名
+        cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname)
     }
 })
 let upload = multer({ storage: storage })
 
 app.post('/upload', upload.single('avatar'), function(req, res) {
+    res.setHeader('content-type', 'application/json;charset=utf8');
     if (!req.file) {
         res.end('noimg')
         return
     }
-    // let resData = JSON.stringify({ src: 'http://' + req.hostname + `:${PORT}/` + req.file.destination + '/' + req.file.filename })
-    // res.set({
-    //     'Access-Control-Allow-Origin': '*',
-    // })
-    res.end('img uploaed')
+    let uploadUser = req.body['img-username']
+    connection.query(updateSql, [req.file.path, uploadUser], (err, result) => {
+        if (err) {
+            console.log(err)
+            res.end('更新头像错误');
+        }
+        res.end(req.file.path)
+    });
 })
 
 io.on('connection', function(socket) {
     totalUser++
-    //console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
+    updateRoom()
+        //console.log('------------\n'+'1位用户链接了,当前总共 [ ' + totalUser + ' ] 人在线  '+dateNow())
 
     // 加入房间
-    socket.on('joinRoom', function(roomId) {
+    socket.on('joinRoom', function(roomId, userInfo) {
         if (socket.id in users && users[socket.id] !== roomId) {
             socket.emit('changeRoom', roomId)
             return
@@ -132,11 +143,16 @@ io.on('connection', function(socket) {
         }
         if (!rooms[roomId].playerA) {
             rooms[roomId].playerA = socket.id
+            rooms[roomId].nicknameA = userInfo ? userInfo.nickname : ''
+            rooms[roomId].avatarA = userInfo ? userInfo.avatar : ''
+
             users[socket.id] = roomId
             socket.join(roomId)
             io.to(roomId).emit('message', '您进入了 <span id="msg-room-id">' + roomId + ' </span>房间，邀请你的小伙伴吧');
         } else if (!rooms[roomId].playerB && rooms[roomId].playerA !== socket.id) {
             rooms[roomId].playerB = socket.id
+            rooms[roomId].nicknameB = userInfo ? userInfo.nickname : ''
+            rooms[roomId].avatarB = userInfo ? userInfo.avatar : ''
             users[socket.id] = roomId
             socket.join(roomId)
                 //socket.broadcast.to(roomId).emit('bEnter', '玩家进入,可以开始了');
@@ -149,6 +165,8 @@ io.on('connection', function(socket) {
 
         //console.log('rooms', rooms)
         //console.log('users', users)
+        updateRoom()
+
     })
 
     socket.on('disconnect', function() {
@@ -177,6 +195,8 @@ io.on('connection', function(socket) {
             //console.log('rooms', rooms)
             //console.log('users', users)
         }
+        updateRoom()
+
     })
     socket.on('isEnter', function() {
         if (!(socket.id in users)) {
@@ -208,8 +228,8 @@ io.on('connection', function(socket) {
     })
 })
 
-http.listen(888, function() {
-    console.log('\n服务器启动成功，端口 88 --启动时间：' + dateNow() + ' \n')
+http.listen(PORT, function() {
+    console.log('\n启动成功 --' + dateNow() + ' \n')
 })
 
 function dateNow(dateString) {
@@ -221,4 +241,8 @@ function dateNow(dateString) {
     let date =
         '' + d.getFullYear() + '-' + padZero(d.getMonth() + 1) + '-' + padZero(d.getDate()) + ' ' + padZero(d.getHours()) + ':' + padZero(d.getMinutes()) + ':' + padZero(d.getSeconds()) + ' 星期' + week[d.getDay()]
     return date
+}
+
+function updateRoom() {
+    io.sockets.emit('updateRoom', rooms);
 }

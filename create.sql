@@ -10,9 +10,9 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL DEFAULT '' COMMENT '用户名',
   `password` varchar(255) NOT NULL DEFAULT '' COMMENT '密码',
   `nickname` varchar(255) NOT NULL DEFAULT '' COMMENT '昵称',
-  `sign` varchar(255) NOT NULL DEFAULT '这个人很懒。' COMMENT '签名',
+  `sign` varchar(255) NOT NULL DEFAULT '' COMMENT '签名',
   `avatar` varchar(255) NOT NULL DEFAULT '' COMMENT '头像',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10001 DEFAULT CHARSET=utf8;
 

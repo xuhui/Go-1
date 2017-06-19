@@ -3,6 +3,7 @@ var context = chess.getContext('2d');
 var step = document.getElementById('step');
 var chessBord = [];
 var socket = io();
+var userInfo;
 var me = true; // 黑子为TRUE 
 var myTurn = false;
 var start = false;
@@ -328,7 +329,7 @@ socket.on('changeRoom', function (msg) {
 // 进入房间
 $('#enter-room').on('click', function () {
     if ($('#room-id').val().trim()) {
-        socket.emit('joinRoom', $('#room-id').val());
+        socket.emit('joinRoom', $('#room-id').val(),userInfo);
         $('.go-info span').text('您进入的房间为: ' + $('#room-id').val());
     } else {
         logMsg('还没输入房间名哦。。');

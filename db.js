@@ -34,7 +34,7 @@ connection.query(addSql, addSqlParams, function(err, result) {
     }
 
     console.log('--------------------------INSERT----------------------------');
-    console.log('result changed',result);
+    console.log('result changed', result);
     console.log('-----------------------------------------------------------------\n\n');
 });
 

@@ -10,7 +10,6 @@ $(function() {
             console.log(error);
         }
     });
-
     $('.reg').hide();
     $('.to-reg').on('click', function() {
         $('.log').hide();
@@ -38,7 +37,8 @@ $(function() {
                 username: username,
                 password: password,
             }, function(data) {
-                console.log(data)
+                userInfo = data;
+                console.log(data);
             })
             console.log(username, password);
             $('.log-info').text('');
@@ -68,7 +68,7 @@ $(function() {
             $('.reg-info').text('昵称格式不正确 (可包含中文、字母、数字、下划线,长度 2-16)。');
 
         } else {
-            $('#upload-form').submit();
+            $('#img-username').val(username);
             $.post('register', {
                 username: username,
                 password: password,
@@ -76,7 +76,10 @@ $(function() {
                 sign: sign,
             }, function(data) {
                 console.log(data)
-            })
+                if (data === '注册成功') {
+                    $('#upload-form').submit();
+                }
+            });
             console.log(username, password, passwordConfirm);
             $('.reg-info').text('');
 
@@ -176,6 +179,42 @@ $(function() {
         }
     }
 
+    var defaultAvatar='qwer.jpg';
+    var emptyAvatar='empty.jpg';
+    socket.on('updateRoom',function(rooms){
+        console.log(rooms);
+        $('.room-items').html('');
+        for (var key in rooms) {
+            var room = rooms[key];
+            var avatarA = room.avatarA ? room.avatarA : defaultAvatar;
+            var nicknameA = room.nicknameA ? room.nicknameA : room.playerA;
+            if (room.playerB) {
+                var avatarB = room.avatarB ? room.avatarB : defaultAvatar;
+                var nicknameB = room.nicknameB ? room.nicknameB : room.playerB;
+            }else {
+                avatarB=emptyAvatar;
+                nicknameB='点击加入';
+            }
+
+            var roomHtml=
+            '            <div class="room-item">'+
+            '                <h3 class="room-name">'+key+'</h3>'+
+            '                <div class="room-left">'+
+            '                    <img src="'+avatarA+'" alt="img">'+
+            '                    <p class="roon-user">'+nicknameA+'</p>'+
+            '                </div>'+
+            '                <div class="room-right">'+
+            '                    <img src="'+avatarB+'" alt="img">'+
+            '                    <p class="roon-user">'+nicknameB+'</p>'+
+            '                </div>'+
+            '            </div>';
+
+            console.log(roomHtml)
+            $('.room-items').append(roomHtml);
+        }
+
+
+    })
 
 
 
